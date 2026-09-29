@@ -11,8 +11,7 @@
   "d1_databases": [{
     "binding": "LEADS_DB",
     "database_name": "koola-leads",
-    // DEPLOYMENT PREREQUISITE: replace with the real `wrangler d1 create` ID.
-    "database_id": "00000000-0000-0000-0000-000000000000",
+    "database_id": "a6e2618c-1882-4a3a-83c7-796dadd4a9bb",
     "migrations_dir": "migrations"
   }]
 }
