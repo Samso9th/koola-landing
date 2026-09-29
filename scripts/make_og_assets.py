@@ -22,10 +22,12 @@ def autotrim(img, tol=12):
                 top, bottom = min(top, y), max(bottom, y)
     return img.crop((left, top, right + 1, bottom + 1))
 
-# --- OG image: center logo lockup (flask + wordmark), middle column of the sheet ---
+# --- OG image: selected logo lockup (carrier bag + wordmark), THIRD column of the sheet ---
+# The site's Brand sprite (.brand-symbol/.brand-name offsets) crops the third column,
+# so previews must use the same mark, not the second column.
 col_w = W // 3
 SPLIT_Y = 660  # between wordmark bottom (~y625) and icon tile top (~y680)
-lockup = autotrim(master.crop((col_w, 0, 2 * col_w, SPLIT_Y)))
+lockup = autotrim(master.crop((2 * col_w, 0, W, SPLIT_Y)))
 
 OG_W, OG_H = 1200, 630
 og = Image.new('RGB', (OG_W, OG_H), CREAM)
@@ -35,8 +37,8 @@ og.paste(resized, ((OG_W - resized.width) // 2, (OG_H - resized.height) // 2))
 og.save('public/brand/koola-og.png', optimize=True)
 print('og:', og.size, '->', 'public/brand/koola-og.png')
 
-# --- App icons: middle icon tile (red rounded square with flask), bottom middle ---
-icon = autotrim(master.crop((col_w, SPLIT_Y, 2 * col_w, H)))
+# --- App icons: third icon tile (red rounded square with carrier bag), bottom of third column ---
+icon = autotrim(master.crop((2 * col_w, SPLIT_Y, W, H)))
 for size, name in ((180, 'apple-touch-icon.png'), (512, 'icon-512.png'), (192, 'icon-192.png'), (32, 'favicon.png')):
     icon.resize((size, size), Image.LANCZOS).save(f'public/brand/{name}', optimize=True)
     print('icon:', size, '->', f'public/brand/{name}')
