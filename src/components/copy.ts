@@ -2,8 +2,8 @@ export const copy = {
   en: {
     nav: ['How it works', 'For our people', 'Questions'], join: 'Join the waitlist', coming: 'KANO & KATSINA, WE’RE COMING.',
     title: ['Good food.', 'Closer to you.'], intro: 'From the kitchens you love to wherever you are. Your next good meal is a little closer.',
-    heroNote: 'First to know. First to order.', cities: 'Starting in Kano & Katsina', dish: ['Jollof & chicken', 'Golden masa'],
-    dishNote: ['A little smoky. A lot of comfort.', 'For the love of a local favourite.'], taste: 'A TASTE OF WHAT’S COMING',
+    heroNote: 'First to know. First to order.', cities: 'Starting in Kano & Katsina', dish: ['Jollof & chicken', 'Golden masa', 'Suya skewers'],
+    dishNote: ['A little smoky. A lot of comfort.', 'For the love of a local favourite.', 'Spicy, smoky, straight off the grill.'], taste: 'A TASTE OF WHAT’S COMING',
     pause: 'Pause motion', play: 'Resume motion', scroll: 'GOOD FOOD IS JUST THE START',
     howLabel: 'LESS RUNNING AROUND. MORE SITTING DOWN.', howTitle: 'Craving. Tap. Enjoy.',
     steps: [ ['Find your favourite.', 'Discover nearby kitchens and choose what you’re in the mood for.'], ['We’ll take it from here.', 'Your vendor prepares your food. A nearby rider picks it up.'], ['Make room at the table.', 'Follow your order all the way to your door. Then tuck in.'] ],
@@ -17,7 +17,7 @@ export const copy = {
   ha: {
     nav: ['Yadda yake aiki', 'Abokan hulɗa', 'Tambayoyi'], join: 'Shiga jerin jira', coming: 'KANO DA KATSINA, MUNA TAFE.',
     title: ['Abinci mai daɗi.', 'Kusa da kai.'], intro: 'Daga wuraren abincin da kake so zuwa inda kake. Abincinka ya ƙara zuwa kusa.',
-    heroNote: 'Ka fara samun labari.', cities: 'Za mu fara a Kano da Katsina', dish: ['Jollof da kaza', 'Masa'], dishNote: ['Abinci mai daɗi da ƙamshi.', 'Abincin da muka sani kuma muke so.'], taste: 'DAGA CIKIN ABUBUWAN DA MUKA SHIRYA',
+    heroNote: 'Ka fara samun labari.', cities: 'Za mu fara a Kano da Katsina', dish: ['Jollof da kaza', 'Masa', 'Suya'], dishNote: ['Abinci mai daɗi da ƙamshi.', 'Abincin da muka sani kuma muke so.', 'Mai yaji kuma mai ƙamshi.'], taste: 'DAGA CIKIN ABUBUWAN DA MUKA SHIRYA',
     pause: 'Dakatar da motsi', play: 'Ci gaba da motsi', scroll: 'ABINCI MAI DAƊI SHI NE FARKO',
     howLabel: 'KA HUTA, MU KAWO MAKA.', howTitle: 'Zaɓa. Yi oda. Ji daɗi.',
     steps: [ ['Zaɓi abin da kake so.', 'Duba wuraren abinci na kusa ka zaɓi abincinka.'], ['Mu za mu kula.', 'Mai sayarwa zai shirya abincinka. Mai kai kaya zai ɗauka.'], ['Shirya wurin cin abinci.', 'Bi diddigin odarka har ta iso ƙofarka.'] ],
