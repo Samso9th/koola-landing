@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     images: ['/brand/koola-og.png'],
   },
   icons: {
-    icon: [{ url: '/brand/favicon.png', sizes: '32x32', type: 'image/png' }, { url: '/brand/icon-192.png', sizes: '192x192', type: 'image/png' }],
+    icon: [{ url: '/brand/favicon.svg', type: 'image/svg+xml' }, { url: '/brand/favicon.png', sizes: '32x32', type: 'image/png' }, { url: '/brand/icon-192.png', sizes: '192x192', type: 'image/png' }],
     apple: '/brand/apple-touch-icon.png',
   },
   robots: { index: true, follow: true },
