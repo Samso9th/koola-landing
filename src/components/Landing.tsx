@@ -20,11 +20,21 @@ export default function Landing() {
   const [paused, setPaused] = useState(false);
   const [meal, setMeal] = useState(0);
   const [role, setRole] = useState<Role>('customer');
+  const [city, setCity] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
+  const [cityActive, setCityActive] = useState(0);
+  const cityPicker = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<'idle'|'saving'|'success'|'error'>('idle');
   const [error, setError] = useState('');
   const swipe = useRef(0);
   const t = copy[lang];
   useEffect(() => { document.documentElement.lang = lang; }, [lang]);
+  useEffect(() => {
+    if (!cityOpen) return;
+    const outside = (event: PointerEvent) => { if (!cityPicker.current?.contains(event.target as Node)) setCityOpen(false); };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, [cityOpen]);
   useEffect(() => {
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setMenu(false); };
     document.addEventListener('keydown', close);
@@ -71,6 +81,7 @@ export default function Landing() {
   };
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault(); if (status === 'saving') return;
+    if (!city) { setError(lang === 'en' ? 'Choose Kano or Katsina.' : 'Zaɓi Kano ko Katsina.'); setStatus('error'); document.querySelector<HTMLButtonElement>('#signup-city')?.focus(); return; }
     const data = new FormData(e.currentTarget);
     setStatus('saving'); setError('');
     const controller = new AbortController();
@@ -107,7 +118,7 @@ export default function Landing() {
         <fieldset className="role-picker"><legend>{t.role}</legend>{roles.map((r,i)=><label key={r} className={r===role ? 'selected' : ''}><input type="radio" name="role" value={r} checked={role===r} onChange={()=>setRole(r)}/>{t.roleNames[i]}</label>)}</fieldset>
         <label htmlFor="signup-name">{t.name}</label><input id="signup-name" name="name" autoComplete="name" minLength={2} maxLength={100} required placeholder={lang==='en' ? 'First and last name' : 'Suna da sunan mahaifi'}/>
         <label htmlFor="signup-email">{t.email}</label><input id="signup-email" name="email" type="email" autoComplete="email" maxLength={254} required placeholder="you@example.com"/>
-        <div className="form-row"><div><label htmlFor="signup-phone">{t.phone}</label><input id="signup-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required minLength={10} maxLength={20} placeholder="0801 234 5678"/></div><div><label htmlFor="signup-city">{t.city}</label><select id="signup-city" name="city" required defaultValue=""><option value="" disabled>{lang==='en' ? 'Choose city' : 'Zaɓi gari'}</option><option>Kano</option><option>Katsina</option></select></div></div>
+        <div className="form-row"><div><label htmlFor="signup-phone">{t.phone}</label><input id="signup-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required minLength={10} maxLength={20} placeholder="0801 234 5678"/></div><div ref={cityPicker} className="city-picker"><label id="signup-city-label" htmlFor="signup-city">{t.city}</label><input type="hidden" name="city" value={city}/><button id="signup-city" type="button" className="city-trigger" role="combobox" aria-labelledby="signup-city-label" aria-haspopup="listbox" aria-expanded={cityOpen} aria-controls="signup-city-options" aria-activedescendant={cityOpen ? `signup-city-option-${cityActive}` : undefined} onClick={() => { setCityActive(Math.max(0,['Kano','Katsina'].indexOf(city))); setCityOpen(!cityOpen); }} onKeyDown={event => { if (event.key === 'Escape') setCityOpen(false); else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); setCityActive(current => Math.max(0,Math.min(1,current+(event.key === 'ArrowDown' ? 1 : -1)))); setCityOpen(true); } else if ((event.key === 'Enter' || event.key === ' ') && cityOpen) { event.preventDefault(); setCity(['Kano','Katsina'][cityActive]); setCityOpen(false); } }}><span>{city || (lang==='en' ? 'Choose city' : 'Zaɓi gari')}</span><span className="city-chevron" aria-hidden="true">⌄</span></button>{cityOpen&&<div id="signup-city-options" className="city-options" role="listbox" aria-labelledby="signup-city-label">{['Kano','Katsina'].map((option,index)=><button key={option} id={`signup-city-option-${index}`} type="button" role="option" aria-selected={city===option} className={cityActive===index?'active':''} onMouseEnter={()=>setCityActive(index)} onClick={()=>{setCity(option);setCityOpen(false);setStatus('idle');document.querySelector<HTMLButtonElement>('#signup-city')?.focus();}}>{option}{city===option&&<span aria-hidden="true">✓</span>}</button>)}</div>}</div></div>
         <div className="honey" aria-hidden="true"><label htmlFor="website">Website</label><input id="website" name="website" tabIndex={-1} autoComplete="off"/></div>
         <label className="consent"><input type="checkbox" name="consent" required/><span>{t.consent}</span></label><p className="data-note">{t.data}</p>
         {status==='error' && <p className="form-error" role="alert">{lang==='en' ? error : t.error}</p>}
