@@ -1,5 +1,6 @@
 {
   "name": "koola-landing",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +8,6 @@
     "build": "next build",
     "typecheck": "tsc --noEmit && tsc --project worker/tsconfig.json",
     "preview": "wrangler dev --local --port 8787",
-    "db:local": "wrangler d1 migrations apply koola-leads --local",
     "deploy": "npm run build && wrangler deploy",
     "test:leads": "node scripts/test-leads.mjs",
     "worker:preview": "wrangler dev --local --port 8787",

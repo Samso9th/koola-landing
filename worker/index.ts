@@ -1,18 +1,9 @@
-// Structural types keep this Worker independent of the future core API.
-interface Statement {
-  bind(...values: unknown[]): Statement;
-  first<T = Record<string, unknown>>(): Promise<T | null>;
-  run(): Promise<{ success: boolean }>;
-}
-interface Database { prepare(sql: string): Statement }
 interface Env {
-  LEADS_DB?: Database;
+  API_ORIGIN?: string;
   ASSETS?: { fetch(request: Request): Promise<Response> };
 }
 
 const MAX_BYTES = 4096;
-const WINDOW_SECONDS = 600;
-const QUOTA = 30;
 const headers = {
   'Content-Type': 'application/json; charset=utf-8',
   'Cache-Control': 'no-store',
@@ -29,7 +20,8 @@ function error(status: number, code: string, extra: Record<string, string> = {})
   return json(status, { ok: false, error: code }, extra);
 }
 class InputError extends Error {
-  constructor(public status: number, public code: string) { super(code); }
+  status: number; code: string;
+  constructor(status: number, code: string) { super(code); this.status=status; this.code=code; }
 }
 async function readBody(request: Request): Promise<unknown> {
   const length = request.headers.get('Content-Length');
@@ -88,25 +80,6 @@ function validate(input: unknown) {
       || value.consent !== true || raw.website !== '') return invalid();
   return { name, email, phone, city: raw.city, role: raw.role };
 }
-async function takeQuota(db: Database, request: Request) {
-  const now = Math.floor(Date.now() / 1000);
-  const bucket = Math.floor(now / WINDOW_SECONDS) * WINDOW_SECONDS;
-  // Cloudflare supplies this header at the edge. Never trust X-Forwarded-For.
-  // Local preview and missing-IP requests deliberately share one fallback quota.
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${bucket}:${ip}`));
-  const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
-  const cleanup = await db.prepare('DELETE FROM lead_rate_limits WHERE expires_at <= ?').bind(now).run();
-  if (!cleanup.success) throw new Error('quota cleanup failed');
-  // One atomic statement prevents concurrent requests from overspending the quota.
-  const result = await db.prepare(`
-    INSERT INTO lead_rate_limits (ip_hash, bucket, count, expires_at) VALUES (?, ?, 1, ?)
-    ON CONFLICT(ip_hash, bucket) DO UPDATE SET count = count + 1
-    WHERE count < ? RETURNING count
-  `).bind(hash, bucket, bucket + WINDOW_SECONDS, QUOTA).first<{ count: number }>();
-  return { allowed: result !== null, retryAfter: bucket + WINDOW_SECONDS - now };
-}
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -129,28 +102,25 @@ export default {
         return error(415, 'unsupported_content_encoding');
       }
     }
-    const db = env.LEADS_DB;
-    if (!db || typeof db.prepare !== 'function') return error(503, 'service_unavailable');
+    const origin = env.API_ORIGIN;
+    if (!origin || !/^https:\/\/[^/]+$/.test(origin)) return error(503, 'service_unavailable');
     try {
       if (url.pathname === '/api/health') {
-        // Verify the actual schema, not merely presence of a binding.
-        await db.prepare('SELECT id FROM leads LIMIT 1').first();
-        await db.prepare('SELECT bucket FROM lead_rate_limits LIMIT 1').first();
-        return json(200, { ok: true });
+        const response = await fetch(`${origin}/health/ready`, { signal: AbortSignal.timeout(5000), cache: 'no-store' });
+        return response.ok ? json(200, { ok: true }) : error(503, 'service_unavailable');
       }
-      const quota = await takeQuota(db, request);
-      if (!quota.allowed) return error(429, 'rate_limited', { 'Retry-After': String(quota.retryAfter) });
       const lead = validate(await readBody(request));
-      const result = await db.prepare(`
-        INSERT INTO leads (name, email, phone, city, role, consent)
-        VALUES (?, ?, ?, ?, ?, 1)
-        ON CONFLICT(email, role, city) DO NOTHING
-      `).bind(lead.name, lead.email, lead.phone, lead.city, lead.role).run();
-      if (!result.success) throw new Error('write failed');
-      return json(200, { ok: true });
+      const response = await fetch(`${origin}/api/v1/leads`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(10000),
+        body: JSON.stringify({ ...lead, consent: true }),
+      });
+      const result = await response.json().catch(() => null) as { ok?: boolean; error?: { code?: string } } | null;
+      if (response.ok && result?.ok === true) return json(200, { ok: true });
+      if (response.status === 429) return error(429, 'rate_limited', { 'Retry-After': response.headers.get('Retry-After') || '60' });
+      if (response.status === 400) return error(400, 'invalid_lead');
+      return error(503, 'service_unavailable');
     } catch (cause) {
       if (cause instanceof InputError) return error(cause.status, cause.code);
-      // No request bodies, emails, phone numbers or database errors in responses/logs.
       return error(503, 'service_unavailable');
     }
   },

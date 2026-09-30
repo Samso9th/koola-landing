@@ -59,6 +59,6 @@ const fs = require('node:fs');
  const b=await page.locator('.plate-float').evaluate(el=>getComputedStyle(el).transform);
  assert.equal(a,b);
  assert.deepEqual(errors,[]);
- console.log('PASS: production page, dish switch, EN/HA, role preselection, actual D1 signup, honest error state, mobile menu, 320/390/768/1024/1440 overflow checks, reduced motion, no page errors.');
+ console.log('PASS: production page, dish switch, EN/HA, role preselection, API-backed signup, honest error state, mobile menu, 320/390/768/1024/1440 overflow checks, reduced motion, no page errors.');
  await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});
