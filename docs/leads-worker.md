@@ -1,6 +1,6 @@
 # Landing lead Worker
 
-This Worker owns only landing leads and static exports. It has no core API dependency, authentication secret, or deployment claim. `wrangler.jsonc` contains a zero UUID placeholder; a real D1 database ID is a deployment prerequisite.
+This Worker owns only landing leads and static exports. It has no core API dependency or authentication secret. `wrangler.jsonc` contains the existing remote `LEADS_DB` binding. The live origin passed health, synthetic signup, persistence and exact cleanup checks on 30 September 2026; see [live verification evidence](live-waitlist-verification.md).
 
 ## Integration
 
@@ -53,13 +53,13 @@ Each IP gets 30 eligible POST attempts per fixed ten-minute window, including in
 
 Only SHA-256 of bucket timestamp + IP is stored, never the raw IP. Including the bucket limits correlation across windows; this unkeyed hash is pseudonymous and is not resistant to enumerating IP addresses. It requires no secret. Expired counters are deleted via an indexed query on each eligible POST; idle databases retain expired hashes until the next eligible request. Fixed windows permit bursts across a boundary and shared networks share quotas. Lead rows intentionally retain consent and server-generated creation time; no lead retention/deletion policy is automated here.
 
-## Deployment prerequisites
+## Deployment to a new environment
 
 ```sh
 npx wrangler d1 create koola-leads
 ```
 
-Replace the placeholder database_id in wrangler.jsonc with the returned ID, then:
+For a new environment only, set database_id in its Wrangler configuration to the returned ID, then:
 
 ```sh
 npx wrangler d1 migrations apply LEADS_DB --remote
@@ -67,6 +67,6 @@ npm run build
 npx wrangler deploy
 ```
 
-Run these only for the intended Cloudflare account/database. Local migrations never migrate production. Apply migrations before deploying the Worker; confirm health on the deployed origin. No database has been created or deployed by this implementation.
+Run these only for the intended Cloudflare account/database. Local migrations never migrate production. Apply migrations before deploying the Worker; confirm health on the deployed origin. The existing production database was verified through its configured binding; this verification created no database and deployed no changes.
 
 Official references: [D1 local development](https://developers.cloudflare.com/d1/best-practices/local-development/), [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/), and [Workers static assets bindings and routing](https://developers.cloudflare.com/workers/static-assets/binding/).

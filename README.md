@@ -27,13 +27,13 @@ For integration tests, follow [isolated database setup](docs/leads-worker.md), t
 
 ## Deploy
 
-Create the intended Cloudflare D1 database, replace the placeholder ID in `wrangler.jsonc`, apply remote migrations, then run `npm run deploy`. Full commands and API contract are in [Worker documentation](docs/leads-worker.md). Nothing has been deployed. The core backend's Docker/Coolify service is a separate future implementation.
+The landing is live at https://koola.store, and `wrangler.jsonc` contains the existing `LEADS_DB` binding. Live health, signup persistence and exact QA cleanup were verified on 30 September 2026; see [verification evidence](docs/live-waitlist-verification.md). Deployment commands and the API contract are in [Worker documentation](docs/leads-worker.md). This verification did not deploy changes.
 
 ## Review before launch
 
 - Have a Hausa speaker review the translation.
 - Set signup retention and privacy contact details.
 - Produce vector/small-size brand exports matching the selected master. Current displays reuse the original raster geometry.
-- Configure the domain and verify signup on the deployed origin.
+- Repeat live signup verification after future routing or storage changes.
 
 Food images illustrate the upcoming service; they do not depict a verified vendor menu. App, WhatsApp and Telegram channels are marked coming soon. GSAP provides depth, tilt and plate motion; there is no Three.js scene. Motion can be paused and respects reduced-motion preferences.
